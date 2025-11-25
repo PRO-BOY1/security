@@ -3,7 +3,11 @@ import session from "express-session";
 import path from "path";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
+import mongoose from "mongoose";
+import bodyParser from "body-parser";
+import cors from "cors";
 import authRouter from "./auth.js";
+import Bot from "./models/Bot.js";
 
 dotenv.config();
 const app = express();
@@ -11,12 +15,11 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
-
+app.use(bodyParser.json());
+app.use(cors());
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -25,11 +28,20 @@ app.use(
   })
 );
 
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+
+// Auth routes
 app.use("/auth", authRouter);
 
+// ------------------ MongoDB ------------------ //
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.log('MongoDB connection error:', err));
+
+// ------------------ Website Routes ------------------ //
 app.get("/", (req, res) => {
   if (!req.session.user) return res.redirect("/auth/login");
-
   if (req.session.user.id !== process.env.ADMIN_ID)
     return res.status(403).send("Access Denied");
 
@@ -50,36 +62,15 @@ app.post("/toggle-password", (req, res) => {
   res.redirect("/");
 });
 
-
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const Bot = require('./models/Bot');
-
-const app = express();
-app.use(cors());
-app.use(bodyParser.json());
-app.set('view engine', 'ejs');
-
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log('MongoDB connection error:', err));
-
 // ------------------ API Routes ------------------ //
-
-// 1️⃣ Register bot (first-run)
 app.post('/api/register-bot', async (req, res) => {
   try {
     const { token, client_name, servers } = req.body;
-
     let existing = await Bot.findOne({ token });
     if (existing) return res.status(400).json({ error: 'Bot already registered' });
 
     const newBot = new Bot({ token, client_name, servers });
     await newBot.save();
-
     return res.json({ message: 'Bot registered successfully, waiting for approval' });
   } catch (err) {
     console.error(err);
@@ -87,7 +78,6 @@ app.post('/api/register-bot', async (req, res) => {
   }
 });
 
-// 2️⃣ Check activation
 app.get('/api/check-activation', async (req, res) => {
   try {
     const { token } = req.query;
@@ -105,7 +95,6 @@ app.get('/api/check-activation', async (req, res) => {
   }
 });
 
-// 3️⃣ Update server list (bot can call this each restart)
 app.post('/api/update-servers', async (req, res) => {
   try {
     const { token, servers } = req.body;
@@ -123,17 +112,11 @@ app.post('/api/update-servers', async (req, res) => {
   }
 });
 
-// ------------------------------------------------- //
-
 // Admin dashboard
 app.get('/dashboard', async (req, res) => {
   try {
-    // Simple auth by query param (later you can improve)
     const userId = req.query.userId;
-    if (userId !== process.env.ADMIN_DISCORD_ID) {
-      return res.send('Access denied');
-    }
-
+    if (userId !== process.env.ADMIN_DISCORD_ID) return res.send('Access denied');
     const bots = await Bot.find();
     res.render('dashboard', { bots });
   } catch (err) {
@@ -142,7 +125,6 @@ app.get('/dashboard', async (req, res) => {
   }
 });
 
-// Approve bot
 app.post('/dashboard/approve', async (req, res) => {
   try {
     const { token } = req.body;
@@ -158,7 +140,6 @@ app.post('/dashboard/approve', async (req, res) => {
   }
 });
 
-// Enable / disable password
 app.post('/dashboard/password', async (req, res) => {
   try {
     const { token, enable, password } = req.body;
@@ -175,15 +156,13 @@ app.post('/dashboard/password', async (req, res) => {
   }
 });
 
-
-
-// Add this in your server.js
+// Password status (bot can check)
 app.get("/api/password-status", (req, res) => {
   res.json({
-    passwordEnabled: process.env.PASSWORD_ENABLED === "true" // or false
+    passwordEnabled: process.env.PASSWORD_ENABLED === "true"
   });
 });
 
-
+// ------------------ Start Server ------------------ //
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Running on port ${port}`));
