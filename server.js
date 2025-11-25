@@ -97,5 +97,20 @@ app.post("/api/update-servers", async (req, res) => {
   res.json({ message: "Servers updated" });
 });
 
+
+// Serve dashboard page
+app.get("/", async (req, res) => {
+  // simple auth by query for now
+  const userId = req.query.userId;
+  if (userId !== process.env.ADMIN_DISCORD_ID) {
+    return res.send("Access Denied");
+  }
+
+  // get all bots
+  const bots = await Bot.find();
+  res.render("dashboard", { bots });
+});
+
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Dashboard running on port ${PORT}`));
