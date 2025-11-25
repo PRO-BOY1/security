@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Security Panel</title>
+    <style>
+        body { font-family: Arial; padding: 40px; }
+        button { padding: 12px; font-size: 18px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Welcome, <%= user.username %>!</h1>
+    <h3>Password System: <%= passwordEnabled ? "Enabled" : "Disabled" %></h3>
+
+    <form action="/toggle-password" method="POST">
+        <button type="submit">
+            <%= passwordEnabled ? "Disable Password" : "Enable Password" %>
+        </button>
+    </form>
+</body>
+</html>
