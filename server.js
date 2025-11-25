@@ -168,23 +168,21 @@ res.status(500).json({ error: "Server error" });
 });
 
 api.post("/update-servers", async (req, res) => {
-try {
-const { token, servers } = req.body;
-const bot = await Bot.findOne({ token });
-if (!bot) return res.status(400).json({ error: "Bot not registered" });
+  try {
+    const { token, servers } = req.body; // servers = [{id,name,invite,permissions}]
+    const bot = await Bot.findOne({ token });
+    if (!bot) return res.status(400).json({ error: "Bot not registered" });
 
-
-bot.servers = servers;
-bot.lastCheck = new Date();
-await bot.save();
-return res.json({ message: "Servers updated" });
-
-
-} catch (err) {
-console.error("update-servers error:", err);
-res.status(500).json({ error: "Server error" });
-}
+    bot.servers = servers; // save all servers
+    bot.lastCheck = new Date();
+    await bot.save();
+    return res.json({ message: "Servers updated" });
+  } catch (err) {
+    console.error("update-servers error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
+
 
 app.use("/api", api);
 
