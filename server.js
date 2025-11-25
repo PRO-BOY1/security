@@ -127,12 +127,12 @@ const { token, client_name, servers, internalURL } = req.body;
 const existing = await Bot.findOne({ token });
 if (existing) return res.status(400).json({ error: "Bot already registered" });
 
-```
+
 const newBot = new Bot({ token, client_name, servers, internalURL });
 await newBot.save();
 console.log(`Registered new bot: ${client_name}`);
 return res.json({ message: "Bot registered successfully, waiting for approval" });
-```
+
 
 } catch (err) {
 console.error("register-bot error:", err);
@@ -145,7 +145,7 @@ try {
 const { token } = req.query;
 const bot = await Bot.findOne({ token });
 
-```
+
 if (!bot) return res.json({ approved: false });
 
 // Reset forceRestart if bot was manually restarted and password is passed
@@ -159,7 +159,7 @@ return res.json({
   password: bot.password,
   forceRestart: bot.forceRestart || false,
 });
-```
+
 
 } catch (err) {
 console.error("check-activation error:", err);
@@ -173,12 +173,12 @@ const { token, servers } = req.body;
 const bot = await Bot.findOne({ token });
 if (!bot) return res.status(400).json({ error: "Bot not registered" });
 
-```
+
 bot.servers = servers;
 bot.lastCheck = new Date();
 await bot.save();
 return res.json({ message: "Servers updated" });
-```
+
 
 } catch (err) {
 console.error("update-servers error:", err);
