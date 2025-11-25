@@ -1,20 +1,71 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Security Panel</title>
-    <style>
-        body { font-family: Arial; padding: 40px; }
-        button { padding: 12px; font-size: 18px; cursor: pointer; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Bot Dashboard</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 8px; }
+    th { background: #eee; }
+    button { padding: 4px 8px; margin: 2px; }
+  </style>
 </head>
 <body>
-    <h1>Welcome, <%= user.username %>!</h1>
-    <h3>Password System: <%= passwordEnabled ? "Enabled" : "Disabled" %></h3>
+  <h1>Bot Dashboard</h1>
+  <table>
+    <tr>
+      <th>Client Name</th>
+      <th>Token</th>
+      <th>Approved</th>
+      <th>Password Enabled</th>
+      <th>Servers</th>
+      <th>Actions</th>
+    </tr>
+    <% bots.forEach(bot => { %>
+      <tr>
+        <td><%= bot.client_name %></td>
+        <td><%= bot.token %></td>
+        <td><%= bot.approved %></td>
+        <td><%= bot.passwordEnabled %></td>
+        <td>
+          <ul>
+            <% bot.servers.forEach(s => { %>
+              <li><%= s.name %> - Admin: <%= s.hasAdmin %> - <%= s.inviteLink %></li>
+            <% }) %>
+          </ul>
+        </td>
+        <td>
+          <% if (!bot.approved) { %>
+            <button onclick="approveBot('<%= bot.token %>')">Approve</button>
+          <% } %>
+          <button onclick="togglePassword('<%= bot.token %>', true)">Enable Password</button>
+          <button onclick="togglePassword('<%= bot.token %>', false)">Disable Password</button>
+        </td>
+      </tr>
+    <% }) %>
+  </table>
 
-    <form action="/toggle-password" method="POST">
-        <button type="submit">
-            <%= passwordEnabled ? "Disable Password" : "Enable Password" %>
-        </button>
-    </form>
+  <script>
+    async function approveBot(token) {
+      await fetch('/dashboard/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
+      location.reload();
+    }
+
+    async function togglePassword(token, enable) {
+      let password = '';
+      if (enable) password = prompt('Set password:');
+      await fetch('/dashboard/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, enable, password })
+      });
+      location.reload();
+    }
+  </script>
 </body>
 </html>
