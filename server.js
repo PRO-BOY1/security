@@ -91,21 +91,26 @@ app.post("/dashboard/stop-bot", async (req, res) => {
 });
 
 
-// ------------------ PASSWORD TOGGLE ------------------ //
+// ------------------ PASSWORD TOGGLE + RESTART ------------------ //
 app.post("/dashboard/password", async (req, res) => {
-const { token, enable, password } = req.body;
-const bot = await Bot.findOne({ token });
-if (!bot) return res.status(404).send("Bot not found");
+  const { token, enable, password } = req.body;
+  const bot = await Bot.findOne({ token });
+  if (!bot) return res.status(404).send("Bot not found");
 
-bot.passwordEnabled = enable === "true";
-if (enable === "true" && password) bot.password = password;
-await bot.save();
+  bot.passwordEnabled = enable === "true";
+  if (enable === "true" && password) bot.password = password;
+  await bot.save();
 
-// Optional: Force bot restart by sending a signal or killing it (depends on host)
-// Example: process.exit() if bot hosted on same server
-// TODO: Implement according to deployment method
+  // Force restart the bot (to require password on next login)
+  try {
+    await axios.post(`${bot.internalURL}/internal/kill`, {
+      key: process.env.INTERNAL_API_KEY
+    });
+  } catch (err) {
+    console.log("Restart request failed:", err.message);
+  }
 
-res.redirect(`/dashboard/bot/${token}`);
+  res.redirect(`/dashboard/bot/${token}`);
 });
 
 // ------------------ STATIC ROUTES ------------------ //
