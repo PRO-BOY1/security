@@ -27,6 +27,14 @@
         <h5>Password Protection</h5>
         <p><%= bot.passwordEnabled ? "Enabled 🔒" : "Disabled 🔓" %></p>
 
+<form action="/dashboard/stop-bot" method="POST" class="mt-3">
+    <input type="hidden" name="token" value="<%= bot.token %>">
+    <button type="submit" class="btn btn-danger w-100">
+        STOP BOT
+    </button>
+</form>
+
+
         <form action="/dashboard/password" method="POST" class="mb-2">
           <input type="hidden" name="token" value="<%= bot.token %>">
           <input type="hidden" name="enable" value="<%= bot.passwordEnabled ? "false" : "true" %>">
