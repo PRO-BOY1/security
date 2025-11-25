@@ -125,7 +125,55 @@ app.post('/api/update-servers', async (req, res) => {
 
 // ------------------------------------------------- //
 
-app.listen(3000, () => console.log('Server running on port 3000'));
+// Admin dashboard
+app.get('/dashboard', async (req, res) => {
+  try {
+    // Simple auth by query param (later you can improve)
+    const userId = req.query.userId;
+    if (userId !== process.env.ADMIN_DISCORD_ID) {
+      return res.send('Access denied');
+    }
+
+    const bots = await Bot.find();
+    res.render('dashboard', { bots });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+// Approve bot
+app.post('/dashboard/approve', async (req, res) => {
+  try {
+    const { token } = req.body;
+    const bot = await Bot.findOne({ token });
+    if (!bot) return res.status(400).send('Bot not found');
+
+    bot.approved = true;
+    await bot.save();
+    res.json({ message: 'Bot approved' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+// Enable / disable password
+app.post('/dashboard/password', async (req, res) => {
+  try {
+    const { token, enable, password } = req.body;
+    const bot = await Bot.findOne({ token });
+    if (!bot) return res.status(400).send('Bot not found');
+
+    bot.passwordEnabled = enable;
+    if (enable && password) bot.password = password;
+    await bot.save();
+    res.json({ message: 'Password updated' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
 
 
 
