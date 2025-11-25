@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= bot.client_name %> Details</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <h1 class="mb-4"><%= bot.client_name %> Details</h1>
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h5>Bot Token</h5>
+        <p><%= bot.token %></p>
+        <h5>Servers</h5>
+        <ul>
+          <% bot.servers.forEach(s => { %>
+            <li>
+              <strong><%= s.name %></strong> 
+              - Invite: <%= s.invite || "No invite" %> 
+              - Admin: <%= s.admin ? "Yes" : "No" %>
+            </li>
+          <% }) %>
+        </ul>
+        <h5>Approval</h5>
+        <p><%= bot.approved ? "Approved ✅" : "Not Approved ❌" %></p>
+        <h5>Password Protection</h5>
+        <p><%= bot.passwordEnabled ? "Enabled 🔒" : "Disabled 🔓" %></p>
+
+        <form action="/dashboard/password" method="POST" class="mb-2">
+          <input type="hidden" name="token" value="<%= bot.token %>">
+          <input type="hidden" name="enable" value="<%= bot.passwordEnabled ? "false" : "true" %>">
+          <input type="text" name="password" placeholder="Set Password (if enabling)" class="form-control mb-2">
+          <button type="submit" class="btn btn-warning">
+            <%= bot.passwordEnabled ? "Disable Password" : "Enable Password" %>
+          </button>
+        </form>
+      </div>
+    </div>
+    <a href="/" class="btn btn-secondary">Back to Dashboard</a>
+  </div>
+</body>
+</html>
