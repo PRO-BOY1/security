@@ -14,6 +14,7 @@ const BotSchema = new mongoose.Schema({
   approved: { type: Boolean, default: false },
   passwordEnabled: { type: Boolean, default: false },
   password: { type: String, default: "" },
+  forceRestart: { type: Boolean, default: false },
   lastCheck: { type: Date, default: Date.now }
 });
 
