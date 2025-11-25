@@ -51,6 +51,84 @@ app.post("/toggle-password", (req, res) => {
 });
 
 
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const Bot = require('./models/Bot');
+
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+app.set('view engine', 'ejs');
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.log('MongoDB connection error:', err));
+
+// ------------------ API Routes ------------------ //
+
+// 1️⃣ Register bot (first-run)
+app.post('/api/register-bot', async (req, res) => {
+  try {
+    const { token, client_name, servers } = req.body;
+
+    let existing = await Bot.findOne({ token });
+    if (existing) return res.status(400).json({ error: 'Bot already registered' });
+
+    const newBot = new Bot({ token, client_name, servers });
+    await newBot.save();
+
+    return res.json({ message: 'Bot registered successfully, waiting for approval' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// 2️⃣ Check activation
+app.get('/api/check-activation', async (req, res) => {
+  try {
+    const { token } = req.query;
+    const bot = await Bot.findOne({ token });
+    if (!bot) return res.json({ approved: false });
+
+    return res.json({
+      approved: bot.approved,
+      passwordEnabled: bot.passwordEnabled,
+      password: bot.password
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// 3️⃣ Update server list (bot can call this each restart)
+app.post('/api/update-servers', async (req, res) => {
+  try {
+    const { token, servers } = req.body;
+    const bot = await Bot.findOne({ token });
+    if (!bot) return res.status(400).json({ error: 'Bot not registered' });
+
+    bot.servers = servers;
+    bot.lastCheck = new Date();
+    await bot.save();
+
+    return res.json({ message: 'Servers updated' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ------------------------------------------------- //
+
+app.listen(3000, () => console.log('Server running on port 3000'));
+
+
+
 // Add this in your server.js
 app.get("/api/password-status", (req, res) => {
   res.json({
