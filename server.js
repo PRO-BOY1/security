@@ -167,6 +167,24 @@ res.status(500).json({ error: "Server error" });
 }
 });
 
+api.post("/check-activation-reset", async (req, res) => {
+  try {
+    const { token } = req.body;
+    const bot = await Bot.findOne({ token });
+    if (!bot) return res.status(404).json({ error: "Bot not found" });
+
+    bot.forceRestart = false;
+    await bot.save();
+
+    res.json({ message: "ForceRestart reset" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+
 api.post("/update-servers", async (req, res) => {
   try {
     const { token, servers } = req.body; // servers = [{id,name,invite,permissions}]
