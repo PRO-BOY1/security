@@ -50,5 +50,14 @@ app.post("/toggle-password", (req, res) => {
   res.redirect("/");
 });
 
+
+// Add this in your server.js
+app.get("/api/password-status", (req, res) => {
+  res.json({
+    passwordEnabled: process.env.PASSWORD_ENABLED === "true" // or false
+  });
+});
+
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Running on port ${port}`));
