@@ -1,21 +1,23 @@
+// models/Bot.js
 import mongoose from "mongoose";
 
 const BotSchema = new mongoose.Schema({
-  token: { type: String, required: true, unique: true },
-  client_name: { type: String, required: true },
+  token: String,
+  client_name: String,
   servers: [
     {
       id: String,
       name: String,
       invite: String,
-      admin: Boolean,
-    }
+      permissions: Number, // Discord permissions integer
+    },
   ],
+  internalURL: String,
   approved: { type: Boolean, default: false },
   passwordEnabled: { type: Boolean, default: false },
-  password: { type: String, default: "" },
+  password: String,
   forceRestart: { type: Boolean, default: false },
-  lastCheck: { type: Date, default: Date.now }
+  lastCheck: Date,
 });
 
 export default mongoose.model("Bot", BotSchema);
