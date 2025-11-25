@@ -71,6 +71,26 @@ await bot.save();
 res.redirect("/");
 });
 
+// ------------------ STOP BOT ------------------ //
+app.post("/dashboard/stop-bot", async (req, res) => {
+  const { token } = req.body;
+  const bot = await Bot.findOne({ token });
+  if (!bot) return res.status(404).send("Bot not found");
+
+  try {
+    await axios.post(`${bot.internalURL}/internal/kill`, {
+      key: process.env.INTERNAL_API_KEY
+    });
+
+    console.log(`Stop signal sent to bot ${bot.client_name}`);
+  } catch (err) {
+    console.log("Bot stop request failed:", err.message);
+  }
+
+  res.redirect(`/dashboard/bot/${token}`);
+});
+
+
 // ------------------ PASSWORD TOGGLE ------------------ //
 app.post("/dashboard/password", async (req, res) => {
 const { token, enable, password } = req.body;
