@@ -19,6 +19,7 @@
 
               <h4 class="card-title fw-semibold"><%= bot.client_name %></h4>
 
+              <!-- Token -->
               <p class="text-muted mb-1">
                 Token:
                 <span class="text-primary">
@@ -26,22 +27,25 @@
                 </span>
               </p>
 
+              <!-- License Key -->
               <p class="mb-2">
-                Servers:
-                <span class="badge bg-info">
-                  <%= bot.servers.length %>
+                License:
+                <span class="badge bg-dark">
+                  <%= bot.license_key %>
                 </span>
               </p>
 
+              <!-- Status -->
               <p class="mb-3">
                 Status:
-                <% if(bot.approved) { %>
+                <% if (bot.approved) { %>
                   <span class="badge bg-success">Approved</span>
                 <% } else { %>
                   <span class="badge bg-danger">Not Approved</span>
                 <% } %>
               </p>
 
+              <!-- Buttons -->
               <a href="/dashboard/bot/<%= bot.token %>" class="btn btn-primary btn-sm w-100 mb-2">
                 View Details
               </a>
