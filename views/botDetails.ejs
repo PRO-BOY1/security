@@ -14,13 +14,13 @@
     <div class="card shadow-sm border-0 mb-4">
       <div class="card-body">
 
-        <!-- TOKEN -->
-        <h5 class="fw-semibold">Bot Token</h5>
-        <p class="text-primary"><%= bot.token %></p>
-
         <!-- LICENSE KEY -->
         <h5 class="fw-semibold">License Key</h5>
-        <p class="text-dark"><%= bot.license_key %></p>
+        <p class="text-primary fw-bold"><%= bot.licenseKey %></p>
+
+        <!-- TOKEN -->
+        <h5 class="fw-semibold mt-3">Bot Token</h5>
+        <p class="text-primary"><%= bot.token %></p>
 
         <!-- APPROVAL -->
         <h5 class="fw-semibold mt-3">Approval Status</h5>
@@ -42,13 +42,13 @@
           <% } %>
         </p>
 
-        <!-- STOP BOT BUTTON -->
+        <!-- STOP BOT -->
         <form action="/dashboard/stop-bot" method="POST" class="mb-3">
           <input type="hidden" name="token" value="<%= bot.token %>">
           <button class="btn btn-danger w-100">STOP BOT</button>
         </form>
 
-        <!-- ENABLE/DISABLE PASSWORD -->
+        <!-- PASSWORD UPDATE -->
         <form action="/dashboard/password" method="POST">
           <input type="hidden" name="token" value="<%= bot.token %>">
           <input type="hidden" name="enable" value="<%= bot.passwordEnabled ? "false" : "true" %>">
@@ -66,6 +66,7 @@
     </div>
 
     <a href="/" class="btn btn-secondary">Back to Dashboard</a>
+
   </div>
 
 </body>
