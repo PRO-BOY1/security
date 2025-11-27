@@ -122,23 +122,25 @@ res.redirect(`/dashboard/bot/${token}`);
 const api = express.Router();
 
 api.post("/register-bot", async (req, res) => {
-try {
-const { token, client_name, servers, internalURL } = req.body;
-const existing = await Bot.findOne({ token });
-if (existing) return res.status(400).json({ error: "Bot already registered" });
+  try {
+    const { token, client_name, licenseKey } = req.body;
 
+    let bot = await Bot.findOne({ token });
 
-const newBot = new Bot({ token, client_name, servers, internalURL });
-await newBot.save();
-console.log(`Registered new bot: ${client_name}`);
-return res.json({ message: "Bot registered successfully, waiting for approval" });
+    if (!bot) {
+      bot = new Bot({ token, client_name, licenseKey });
+      await bot.save();
+      return res.json({ message: "Bot registered" });
+    }
 
+    res.json({ error: "Bot already registered" });
 
-} catch (err) {
-console.error("register-bot error:", err);
-res.status(500).json({ error: "Server error" });
-}
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
+
 
 api.get("/check-activation", async (req, res) => {
 try {
